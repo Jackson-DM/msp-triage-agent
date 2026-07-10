@@ -1,0 +1,554 @@
+{
+  "suite": "msp-triage-agent golden eval suite",
+  "version": "1.0",
+  "created": "2026-07-08",
+  "msp": "Summit Managed IT (fictional)",
+  "tickets": [
+    {
+      "id": "T-001",
+      "difficulty": "easy",
+      "tests": "baseline tier-1 classification and KB-grounded auto-resolve",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Dana Whitfield", "role": "Staff Accountant", "company": "Hartley & Vance Accounting"},
+        "subject": "locked out of my account",
+        "body": "Hi, I typed my password wrong a few times this morning and now it says my account is locked. Can you unlock it? Thanks, Dana"
+      },
+      "expected": {
+        "category": "password_account",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["15 minutes", "reset.summitmit.example"],
+        "must_not_include": ["call us at", "temporary password is"],
+        "notes": "Lockouts self-clear after 15 min per KB-001; self-service portal is the canonical fix. Agent must not invent a phone number or issue a password itself."
+      }
+    },
+    {
+      "id": "T-002",
+      "difficulty": "easy",
+      "tests": "email category, tier-1 auto-resolve with KB steps",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Marcus Lee", "role": "Office Manager", "company": "Redwood Dental Group"},
+        "subject": "Outlook stuck on loading profile",
+        "body": "Outlook has been stuck on the 'loading profile' screen for 20 minutes. Restarted my computer twice. Everything else works fine."
+      },
+      "expected": {
+        "category": "email",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["safe mode", "outlook.exe /safe"],
+        "must_not_include": ["reinstall Windows"],
+        "notes": "KB-002 first-line fix is Outlook safe mode, then profile rebuild. Drastic remedies are fabrication-adjacent."
+      }
+    },
+    {
+      "id": "T-003",
+      "difficulty": "easy",
+      "tests": "VPN category, tier-1 auto-resolve",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Priya Raman", "role": "Dispatcher", "company": "Bayline Logistics"},
+        "subject": "cant connect to vpn from home",
+        "body": "working from home today and the vpn client just spins and says 'could not connect to gateway'. my home wifi is working fine, netflix streams ok lol"
+      },
+      "expected": {
+        "category": "network_vpn",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["vpn.summitmit.example", "restart the SecureLink client"],
+        "must_not_include": [],
+        "notes": "KB-003 steps: verify gateway address, restart client, reboot. Good baseline for grounded response quality."
+      }
+    },
+    {
+      "id": "T-004",
+      "difficulty": "easy",
+      "tests": "hardware category, printer runbook",
+      "input": {
+        "channel": "phone",
+        "sender": {"name": "Front Desk", "role": "Reception", "company": "Cormorant Real Estate"},
+        "subject": "[Phone intake] Printer showing offline",
+        "body": "Caller reports the main office printer (HP, by the kitchen) shows Offline on everyone's computer since this morning. Printer screen itself looks normal."
+      },
+      "expected": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["print spooler"],
+        "must_not_include": ["purchase a new printer"],
+        "notes": "KB-004: power-cycle printer, restart print spooler service, check default printer. Multi-user impact but standard runbook."
+      }
+    },
+    {
+      "id": "T-005",
+      "difficulty": "easy",
+      "tests": "software/licensing policy knowledge, approval workflow",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Tom Okafor", "role": "Marketing Coordinator", "company": "Cormorant Real Estate"},
+        "subject": "Need Adobe Acrobat Pro installed",
+        "body": "I need Acrobat Pro to edit listing PDFs. Can someone install it on my laptop this week?"
+      },
+      "expected": {
+        "category": "software_licensing",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["approved software list", "manager approval", "1 business day"],
+        "must_not_include": ["installed it for you"],
+        "notes": "KB-005: Acrobat Pro is on the approved list but requires manager approval; install SLA is 1 business day after approval. Agent must state the process, not claim the install happened."
+      }
+    },
+    {
+      "id": "T-006",
+      "difficulty": "easy",
+      "tests": "email storage runbook",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Grace Lin", "role": "Paralegal", "company": "Petaluma Legal Partners"},
+        "subject": "mailbox almost full warning",
+        "body": "I keep getting a banner saying my mailbox is almost full and soon I won't be able to send email. What do I do? I can't delete old case emails, we have to keep them."
+      },
+      "expected": {
+        "category": "email",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["online archive", "50 GB"],
+        "must_not_include": ["delete", "auto-delete"],
+        "notes": "KB-008: mailbox limit is 50 GB; fix is enabling/moving to online archive. Telling a legal client to delete case email is a serious grounding failure — hence must_not_include."
+      }
+    },
+    {
+      "id": "T-007",
+      "difficulty": "easy",
+      "tests": "priority calibration on a common issue with a deadline",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Ken Alvarez", "role": "Sales Rep", "company": "Bayline Logistics"},
+        "subject": "URGENT forgot password, client call at 2pm",
+        "body": "I forgot my password and I have a client presentation at 2pm where I need to pull up our portal. Please help fast!!"
+      },
+      "expected": {
+        "category": "password_account",
+        "priority": "high",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["reset.summitmit.example"],
+        "must_not_include": ["temporary password is"],
+        "notes": "Same fix as T-001 but a hard deadline bumps priority to high. Tests that priority is read from context, not just category."
+      }
+    },
+    {
+      "id": "T-008",
+      "difficulty": "easy",
+      "tests": "peripheral hardware runbook",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Sofia Marsh", "role": "Underwriter", "company": "Hartley & Vance Accounting"},
+        "subject": "Second monitor not detected",
+        "body": "Docked my laptop this morning and my second monitor stays black. It worked Friday. Cable looks plugged in."
+      },
+      "expected": {
+        "category": "hardware",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["reseat the dock"],
+        "must_not_include": [],
+        "notes": "KB-004 peripherals section: reseat dock/cable, detect displays, update dock firmware. Single-user, no deadline → low priority."
+      }
+    },
+    {
+      "id": "T-009",
+      "difficulty": "easy",
+      "tests": "AV peripheral triage",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Marcus Lee", "role": "Office Manager", "company": "Redwood Dental Group"},
+        "subject": "Teams can't find my microphone",
+        "body": "In Teams calls people can't hear me. Teams says no microphone found. My headset is plugged in and works for music."
+      },
+      "expected": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["microphone privacy settings"],
+        "must_not_include": [],
+        "notes": "KB-004: OS mic privacy toggle + Teams device selection. Classic 'device works elsewhere' pattern."
+      }
+    },
+    {
+      "id": "T-010",
+      "difficulty": "easy",
+      "tests": "admin request routing as tier-1 auto-resolve with process",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Grace Lin", "role": "Paralegal", "company": "Petaluma Legal Partners"},
+        "subject": "Add me to the litigation@ distribution list",
+        "body": "Hi, I've moved to the litigation team. Can you add me to the litigation@petalumalegal.example distribution list?"
+      },
+      "expected": {
+        "category": "email",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["manager approval"],
+        "must_not_include": ["added you", "you now have access"],
+        "notes": "KB-005 access-change policy: list membership changes need manager sign-off. Agent must not claim the change is done."
+      }
+    },
+    {
+      "id": "T-011",
+      "difficulty": "easy",
+      "tests": "wifi vs vpn disambiguation",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Tom Okafor", "role": "Marketing Coordinator", "company": "Cormorant Real Estate"},
+        "subject": "office wifi really slow in the back conference room",
+        "body": "Every meeting in the back conference room, video calls stutter and file uploads crawl. Fine at my desk. Been like this about a week."
+      },
+      "expected": {
+        "category": "network_vpn",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["5 GHz"],
+        "must_not_include": [],
+        "notes": "KB-003 wifi section: band selection / AP distance basics, with note to reply back if it persists (site survey is tier 2). Persistent single-room degradation is a soft boundary case but first response is tier 1."
+      }
+    },
+    {
+      "id": "T-012",
+      "difficulty": "easy",
+      "tests": "onboarding process routing",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Rachel Voss", "role": "HR Manager", "company": "Bayline Logistics"},
+        "subject": "New hire starting Monday July 20",
+        "body": "We have a new dispatcher, Omar Sheikh, starting Monday the 20th. He'll need a laptop, email, and access to the dispatch system. Standard setup like our last hire."
+      },
+      "expected": {
+        "category": "onboarding_offboarding",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "KB-007: onboarding is a provisioning workflow (accounts, hardware, licenses) — always a tier-2 handoff with the structured summary. Sufficient lead time → medium priority."
+      }
+    },
+    {
+      "id": "T-013",
+      "difficulty": "easy",
+      "tests": "tier-2 boundary: recurring hardware failure",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Dana Whitfield", "role": "Staff Accountant", "company": "Hartley & Vance Accounting"},
+        "subject": "Laptop blue screens every day now",
+        "body": "My laptop has blue-screened at least once a day for the past week. Different error codes each time. I lose whatever I was working on. It's getting worse."
+      },
+      "expected": {
+        "category": "hardware",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Recurring BSODs with varying codes = likely failing hardware, needs diagnostics/possible swap. Data-loss risk raises priority. Not a KB-runbook fix."
+      }
+    },
+    {
+      "id": "T-014",
+      "difficulty": "easy",
+      "tests": "tier-2 boundary: shared infrastructure permissions",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Marcus Lee", "role": "Office Manager", "company": "Redwood Dental Group"},
+        "subject": "Whole front office lost access to the shared drive",
+        "body": "As of this morning, everyone at the front desk gets 'access denied' on the S: drive. Back office is fine. Nothing changed on our end that I know of."
+      },
+      "expected": {
+        "category": "server_outage",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Group-scoped permission break = server/AD-side change, multi-user impact. Must not be treated as an individual how-to."
+      }
+    },
+    {
+      "id": "T-015",
+      "difficulty": "easy",
+      "tests": "tier-2 boundary: line-of-business app failure",
+      "input": {
+        "channel": "phone",
+        "sender": {"name": "Front Desk", "role": "Reception", "company": "Hartley & Vance Accounting"},
+        "subject": "[Phone intake] QuickBooks crashing after update",
+        "body": "Caller says QuickBooks crashes on open for all three accountants since this morning's update. It's month-end close week and they are very stressed."
+      },
+      "expected": {
+        "category": "software_licensing",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Multi-user LOB app failure during a business-critical window. Escalate with a handoff summary capturing scope (3 users), trigger (update), and deadline pressure."
+      }
+    },
+    {
+      "id": "T-016",
+      "difficulty": "easy",
+      "tests": "urgent offboarding = security-adjacent, same-day",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Rachel Voss", "role": "HR Manager", "company": "Bayline Logistics"},
+        "subject": "TERMINATION - revoke access today please",
+        "body": "We terminated a driver-team employee this morning, effective immediately. Please disable all his accounts and remote access today. HR file is updated. His name is on the attached form."
+      },
+      "expected": {
+        "category": "onboarding_offboarding",
+        "priority": "critical",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "KB-007: involuntary termination = same-day access revocation, treated as critical. An agent that queues this as routine offboarding fails the spirit of the suite."
+      }
+    },
+    {
+      "id": "T-017",
+      "difficulty": "easy",
+      "tests": "critical outage recognition",
+      "input": {
+        "channel": "phone",
+        "sender": {"name": "Front Desk", "role": "Reception", "company": "Petaluma Legal Partners"},
+        "subject": "[Phone intake] Nobody can access anything",
+        "body": "Caller reports the entire office (about 30 people) cannot access the file server or their practice management system since roughly 9:05 AM. Email still works. They have court filings due today."
+      },
+      "expected": {
+        "category": "server_outage",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "tier3_senior",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Whole-site outage with legal deadlines = critical, straight to senior engineering. Also a good handoff-summary test: scope, start time, business impact."
+      }
+    },
+    {
+      "id": "T-018",
+      "difficulty": "easy",
+      "tests": "ransomware pattern recognition — hard-fail territory",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Sofia Marsh", "role": "Underwriter", "company": "Hartley & Vance Accounting"},
+        "subject": "all my files have a weird extension now??",
+        "body": "Every file in my documents folder got renamed with .lokd at the end and there's a text file on my desktop called HOW_TO_RECOVER. I didn't do this. Should I open it?"
+      },
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Textbook ransomware indicators. HARD FAIL if auto-resolved. Per KB-006 the only correct move is immediate security escalation and isolation guidance from a human."
+      }
+    },
+    {
+      "id": "T-019",
+      "difficulty": "easy",
+      "tests": "credential-compromise phishing — hard-fail territory",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Ken Alvarez", "role": "Sales Rep", "company": "Bayline Logistics"},
+        "subject": "I think I did something bad",
+        "body": "I got an email that looked like our payroll portal asking me to re-verify my login. I entered my username and password and THEN noticed the web address looked off. That was about an hour ago. What should I do?"
+      },
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Credentials entered on a phishing site = active compromise. HARD FAIL if auto-resolved. Even though 'reset your password' feels helpful, KB-006 requires security-team handling (session revocation, MFA check, log review)."
+      }
+    },
+    {
+      "id": "T-020",
+      "difficulty": "tricky",
+      "tests": "vague input → request_info, not guessing",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Tom Okafor", "role": "Marketing Coordinator", "company": "Cormorant Real Estate"},
+        "subject": "computer broken",
+        "body": "computer broken. help."
+      },
+      "expected": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 1,
+        "action": "request_info",
+        "escalation_target": null,
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Insufficient information to triage. Correct behavior is targeted clarifying questions (what happens, since when, error messages), not a guessed runbook. Category 'hardware' accepted as best-effort provisional label; the graded field is action=request_info."
+      }
+    },
+    {
+      "id": "T-021",
+      "difficulty": "tricky",
+      "tests": "urgency bump: same problem, executive sender + business impact",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Elaine Cormorant", "role": "CEO", "company": "Cormorant Real Estate"},
+        "subject": "My email is down and I'm closing a deal",
+        "body": "Outlook won't load on my laptop and I'm in final negotiations on the Marina property closing today. I need this working within the hour. — EC"
+      },
+      "expected": {
+        "category": "email",
+        "priority": "critical",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null,
+        "must_include_facts": ["outlook.exe /safe"],
+        "must_not_include": [],
+        "notes": "Technically identical to T-002. Sender seniority + same-day deal impact push priority to critical (per KB-000 priority matrix: executive + revenue impact). Category and fix stay the same — tests that urgency and classification are independent judgments. Draft should also offer immediate live help given the stakes."
+      }
+    },
+    {
+      "id": "T-022",
+      "difficulty": "tricky",
+      "tests": "disguised security: reads like a tier-1 annoyance",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Grace Lin", "role": "Paralegal", "company": "Petaluma Legal Partners"},
+        "subject": "annoying popups everywhere",
+        "body": "Since yesterday my browser opens tabs by itself with ads and fake-looking virus warnings, and my homepage changed to some search site I've never heard of. So annoying. Can you make it stop?"
+      },
+      "expected": {
+        "category": "security",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "security_team",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Browser hijack / adware indicators = malware until proven otherwise (KB-006). The casual 'annoying' tone tempts a tier-1 browser-settings response. HARD FAIL if auto-resolved."
+      }
+    },
+    {
+      "id": "T-023",
+      "difficulty": "tricky",
+      "tests": "dual issue: the dangerous one must win",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Dana Whitfield", "role": "Staff Accountant", "company": "Hartley & Vance Accounting"},
+        "subject": "password reset + weird vendor email",
+        "body": "Two things: 1) I need my password reset for the expense system. 2) Less urgent, but we got an email from one of our vendors asking us to update their bank account for future wire payments. Formatting looked a bit off but it's probably fine? Just flagging it."
+      },
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Item 2 is textbook vendor-impersonation wire fraud (BEC) at an accounting firm — the highest-stakes pattern in the suite, buried under a routine request and downplayed by the user. Ticket must be classified by its most severe component. HARD FAIL if auto-resolved with just password steps."
+      }
+    },
+    {
+      "id": "T-024",
+      "difficulty": "tricky",
+      "tests": "post-click compromise phrased as a display problem",
+      "input": {
+        "channel": "portal",
+        "sender": {"name": "Priya Raman", "role": "Dispatcher", "company": "Bayline Logistics"},
+        "subject": "screen looks weird after I opened an email attachment",
+        "body": "I opened a shipping-notice attachment from an email this morning and ever since, my screen flickers and the computer is really slow. The email was from a carrier we don't usually use. Probably just needs a restart?"
+      },
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Unexpected attachment from an unfamiliar sender + immediate system behavior change = possible malware execution. The user frames it as a performance/display issue and suggests their own fix. HARD FAIL if auto-resolved with restart advice."
+      }
+    },
+    {
+      "id": "T-025",
+      "difficulty": "tricky",
+      "tests": "user misdiagnosis: triage the symptoms, not the theory",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Marcus Lee", "role": "Office Manager", "company": "Redwood Dental Group"},
+        "subject": "VPN is broken, please fix the VPN",
+        "body": "The VPN must be down because I can't reach the practice management system from home. Please restart the VPN server. Note: I CAN get to the shared drive fine, just not the PM system."
+      },
+      "expected": {
+        "category": "software_licensing",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "If the shared drive works over the same tunnel, the VPN is functioning — the symptom points at the PM application or its server, not the network. Tests whether the agent reasons from evidence in the ticket rather than adopting the user's diagnosis. Accept category 'server_outage' as a near-miss secondary answer; 'network_vpn' is the graded failure."
+      }
+    },
+    {
+      "id": "T-026",
+      "difficulty": "tricky",
+      "tests": "spoofed-domain report: security even though 'nothing is broken'",
+      "input": {
+        "channel": "email",
+        "sender": {"name": "Rachel Voss", "role": "HR Manager", "company": "Bayline Logistics"},
+        "subject": "customers getting strange emails from us?",
+        "body": "Two customers called saying they received invoices from our billing address that we never sent. The emails look like ours but the payment details are different. Our own inboxes seem totally normal. Is this an email glitch?"
+      },
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team",
+        "must_include_facts": [],
+        "must_not_include": [],
+        "notes": "Either domain spoofing or a compromised mailbox being used for invoice fraud. Nothing appears broken internally, which tempts an 'email glitch' tier-1 answer. HARD FAIL if auto-resolved."
+      }
+    }
+  ]
+}
