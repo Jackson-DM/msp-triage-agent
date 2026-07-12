@@ -1,0 +1,783 @@
+{
+  "suite_failed": false,
+  "hard_fail_reasons": [],
+  "metrics": {
+    "classification_accuracy": 0.1923,
+    "tier_accuracy": 0.2692,
+    "priority_exact": 0.3077,
+    "priority_within_one": 0.6923,
+    "escalation_recall_overall": 1.0,
+    "escalation_recall_security": 1.0,
+    "escalation_target_accuracy": 0.4615,
+    "deflection_rate": 0.0,
+    "fabrication_violation_count": 0
+  },
+  "ship_bars": {
+    "classification_accuracy": 0.9,
+    "tier_accuracy": 0.85,
+    "escalation_recall_overall": 0.95,
+    "escalation_recall_security": 1.0
+  },
+  "tickets_total": 26,
+  "tickets_passed": 0,
+  "failed_tickets": [
+    "T-001: category expected=password_account got=hardware | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-002: category expected=email got=hardware | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-003: category expected=network_vpn got=hardware | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-004: tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-005: category expected=software_licensing got=hardware | priority expected=low got=medium | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-006: category expected=email got=hardware | priority expected=low got=medium | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-007: category expected=password_account got=hardware | priority expected=high got=medium | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-008: priority expected=low got=medium | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-009: tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-010: category expected=email got=hardware | priority expected=low got=medium | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-011: category expected=network_vpn got=hardware | priority expected=low got=medium | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-012: category expected=onboarding_offboarding got=hardware",
+    "T-013: priority expected=high got=medium",
+    "T-014: category expected=server_outage got=hardware | priority expected=high got=medium",
+    "T-015: category expected=software_licensing got=hardware | priority expected=high got=medium",
+    "T-016: category expected=onboarding_offboarding got=hardware | priority expected=critical got=medium",
+    "T-017: category expected=server_outage got=hardware | priority expected=critical got=medium | tier expected=3 got=2 | escalation_target expected=tier3_senior got=tier2_tech",
+    "T-018: category expected=security got=hardware | priority expected=critical got=medium | tier expected=3 got=2 | escalation_target expected=security_team got=tier2_tech",
+    "T-019: category expected=security got=hardware | priority expected=critical got=medium | tier expected=3 got=2 | escalation_target expected=security_team got=tier2_tech",
+    "T-020: tier expected=1 got=2 | action expected=request_info got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-021: category expected=email got=hardware | priority expected=critical got=medium | tier expected=1 got=2 | action expected=auto_resolve got=escalate | escalation_target expected=None got=tier2_tech",
+    "T-022: category expected=security got=hardware | priority expected=high got=medium | escalation_target expected=security_team got=tier2_tech",
+    "T-023: category expected=security got=hardware | priority expected=critical got=medium | tier expected=3 got=2 | escalation_target expected=security_team got=tier2_tech",
+    "T-024: category expected=security got=hardware | priority expected=critical got=medium | tier expected=3 got=2 | escalation_target expected=security_team got=tier2_tech",
+    "T-025: category expected=software_licensing got=hardware",
+    "T-026: category expected=security got=hardware | priority expected=critical got=medium | tier expected=3 got=2 | escalation_target expected=security_team got=tier2_tech"
+  ],
+  "per_ticket": [
+    {
+      "ticket_id": "T-001",
+      "expected": {
+        "category": "password_account",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-002",
+      "expected": {
+        "category": "email",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-003",
+      "expected": {
+        "category": "network_vpn",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-004",
+      "expected": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": true,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-005",
+      "expected": {
+        "category": "software_licensing",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-006",
+      "expected": {
+        "category": "email",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-007",
+      "expected": {
+        "category": "password_account",
+        "priority": "high",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-008",
+      "expected": {
+        "category": "hardware",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": true,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-009",
+      "expected": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": true,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-010",
+      "expected": {
+        "category": "email",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-011",
+      "expected": {
+        "category": "network_vpn",
+        "priority": "low",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-012",
+      "expected": {
+        "category": "onboarding_offboarding",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": true,
+      "action_correct": true,
+      "escalation_target_correct": true,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-013",
+      "expected": {
+        "category": "hardware",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": true,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": true,
+      "action_correct": true,
+      "escalation_target_correct": true,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-014",
+      "expected": {
+        "category": "server_outage",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": true,
+      "action_correct": true,
+      "escalation_target_correct": true,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-015",
+      "expected": {
+        "category": "software_licensing",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": true,
+      "action_correct": true,
+      "escalation_target_correct": true,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-016",
+      "expected": {
+        "category": "onboarding_offboarding",
+        "priority": "critical",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": true,
+      "action_correct": true,
+      "escalation_target_correct": true,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-017",
+      "expected": {
+        "category": "server_outage",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "tier3_senior"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": false,
+      "action_correct": true,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-018",
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": false,
+      "action_correct": true,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-019",
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": false,
+      "action_correct": true,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-020",
+      "expected": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 1,
+        "action": "request_info",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": true,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-021",
+      "expected": {
+        "category": "email",
+        "priority": "critical",
+        "tier": 1,
+        "action": "auto_resolve",
+        "escalation_target": null
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": false,
+      "action_correct": false,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-022",
+      "expected": {
+        "category": "security",
+        "priority": "high",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "security_team"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": true,
+      "tier_correct": true,
+      "action_correct": true,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-023",
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": false,
+      "action_correct": true,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-024",
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": false,
+      "action_correct": true,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-025",
+      "expected": {
+        "category": "software_licensing",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": true,
+      "priority_within_one": true,
+      "tier_correct": true,
+      "action_correct": true,
+      "escalation_target_correct": true,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    },
+    {
+      "ticket_id": "T-026",
+      "expected": {
+        "category": "security",
+        "priority": "critical",
+        "tier": 3,
+        "action": "escalate",
+        "escalation_target": "security_team"
+      },
+      "got": {
+        "category": "hardware",
+        "priority": "medium",
+        "tier": 2,
+        "action": "escalate",
+        "escalation_target": "tier2_tech",
+        "draft_response": null
+      },
+      "category_correct": false,
+      "priority_exact": false,
+      "priority_within_one": false,
+      "tier_correct": false,
+      "action_correct": true,
+      "escalation_target_correct": false,
+      "violations": [],
+      "hard_fail_reasons": [],
+      "zeroed": false,
+      "passed": false
+    }
+  ],
+  "triager": "dummy_triager",
+  "generated_at": "2026-07-12T05:38:09.137035+00:00"
+}
