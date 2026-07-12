@@ -1,20 +1,25 @@
-"""Eval suite entrypoint: python -m evals.run [--dummy]
+"""Eval suite entrypoint: python -m evals.run (--dummy | --agent v1) [--limit N]
 
-Loads evals/golden_tickets.json, runs every ticket through the selected
-triager, grades deterministically (see grader.py), prints a scorecard, and
-writes a timestamped JSON report to evals/reports/.
+Loads the golden suite through the DataSource adapter, runs every ticket
+through the selected triager, grades deterministically (see grader.py),
+prints a scorecard with token usage and estimated cost, and writes a
+timestamped JSON report to evals/reports/. --limit N runs the first N
+tickets as a smoke test (scorecard only, no report file written).
 
 Exit codes: 0 = all ship bars met, 1 = hard fail or a ship bar missed,
-2 = no triager available.
+2 = no triager available / missing API key.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+from agent.data_source import LocalJSONDataSource
 
 from .grader import SHIP_BARS, KBCorpus, grade_suite
 
@@ -36,15 +41,23 @@ METRIC_LABELS = {
 }
 
 
-def build_triager(use_dummy: bool):
-    if use_dummy:
+def build_triager(args):
+    if args.dummy:
         from .dummy_triager import DummyTriager
         return DummyTriager()
-    print(
-        "No agent triager exists yet. Run with --dummy for the baseline, or\n"
-        "wire the real agent into evals/run.py:build_triager once it lands.",
-        file=sys.stderr,
-    )
+    if args.agent == "v1":
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            print(
+                "ANTHROPIC_API_KEY is not set. The v1 triager makes live API\n"
+                "calls; export the key and re-run:\n"
+                "  $env:ANTHROPIC_API_KEY = '<your key>'   (PowerShell)\n"
+                "  export ANTHROPIC_API_KEY='<your key>'   (bash)",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        from agent.triage_v1 import TriageV1
+        return TriageV1(KB_DIR, REPORTS_DIR / "parse_failures")
+    print("Select a triager: --dummy (baseline) or --agent v1.", file=sys.stderr)
     sys.exit(2)
 
 
@@ -107,6 +120,20 @@ def print_scorecard(report: dict, previous: dict | None) -> None:
     if previous is None:
         print("\n(no previous report in evals/reports/ - deltas unavailable)")
 
+    if report.get("usage"):
+        u = report["usage"]
+        t = u["totals"]
+        print(
+            f"\nToken usage ({report['tickets_total']} tickets): "
+            f"input {t['input_tokens']:,} | output {t['output_tokens']:,} | "
+            f"cache read {t['cache_read_input_tokens']:,} | "
+            f"cache write {t['cache_creation_input_tokens']:,}"
+        )
+        print(
+            f"Estimated cost: ${u['estimated_cost_usd']:.4f} total "
+            f"(${u['cost_per_ticket_usd']:.4f}/ticket)"
+        )
+
     if report["failed_tickets"]:
         print(f"\nFailed tickets ({len(report['failed_tickets'])}):")
         for line in report["failed_tickets"]:
@@ -115,29 +142,61 @@ def print_scorecard(report: dict, previous: dict | None) -> None:
         print("\nAll tickets passed.")
 
 
+def attach_usage(report: dict, triager) -> None:
+    """Merge the triager's per-ticket token usage and cost estimate into
+    the report. No-op for triagers that don't record usage (dummy)."""
+    usage_log = getattr(triager, "usage_log", None)
+    pricing = getattr(triager, "pricing", None)
+    if not usage_log or not pricing:
+        return
+    for entry, per_ticket in zip(usage_log, report["per_ticket"]):
+        per_ticket["usage"] = entry
+    totals = {k: sum(e.get(k, 0) for e in usage_log) for k in pricing}
+    cost = sum(totals[k] * rate / 1_000_000 for k, rate in pricing.items())
+    report["usage"] = {
+        "totals": totals,
+        "estimated_cost_usd": round(cost, 6),
+        "cost_per_ticket_usd": round(cost / len(usage_log), 6),
+        "pricing_usd_per_mtok": pricing,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m evals.run",
                                      description="Run the golden eval suite.")
-    parser.add_argument("--dummy", action="store_true",
-                        help="use the always-escalate baseline triager")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--dummy", action="store_true",
+                       help="use the always-escalate baseline triager")
+    group.add_argument("--agent", choices=["v1"],
+                       help="use a live agent triager (needs ANTHROPIC_API_KEY)")
+    parser.add_argument("--limit", type=int, metavar="N",
+                        help="smoke test: run only the first N tickets "
+                             "(no report file written)")
     args = parser.parse_args(argv)
 
-    triager = build_triager(args.dummy)
-    tickets = json.loads(TICKETS_PATH.read_text(encoding="utf-8"))["tickets"]
+    triager = build_triager(args)
+    tickets = LocalJSONDataSource(TICKETS_PATH).load_tickets()
+    limited = args.limit is not None and args.limit < len(tickets)
+    if limited:
+        tickets = tickets[:args.limit]
     kb = KBCorpus(KB_DIR)
 
-    previous = latest_previous_report()
+    previous = None if limited else latest_previous_report()
     report = grade_suite(tickets, triager, kb)
     report["triager"] = getattr(triager, "name", type(triager).__name__)
     report["generated_at"] = datetime.now(timezone.utc).isoformat()
+    attach_usage(report, triager)
 
     print_scorecard(report, previous)
 
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    out_path = REPORTS_DIR / f"report_{stamp}.json"
-    out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(f"\nReport written to {out_path.relative_to(ROOT)}")
+    if limited:
+        print(f"\n(smoke test on {len(tickets)} tickets - report not written)")
+    else:
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        out_path = REPORTS_DIR / f"report_{stamp}.json"
+        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print(f"\nReport written to {out_path.relative_to(ROOT)}")
 
     bars_missed = any(
         report["metrics"][k] is None or report["metrics"][k] < bar
