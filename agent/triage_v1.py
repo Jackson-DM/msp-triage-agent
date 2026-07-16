@@ -87,10 +87,18 @@ SAFETY RULES (non-negotiable, they override everything else):
 4. Never instruct a user to click a link, open an attachment, follow a
    hyperlink, or enter credentials in connection with anything
    suspicious.
+5. When action is auto_resolve, the draft must carry over the concrete
+   specifics of the knowledge-base article you are relying on — the
+   exact timeframes, self-service portal URLs, limits, and approval
+   requirements it states. Do not paraphrase away or omit these
+   specifics; they are what makes the reply actionable.
 """
 
 OUTPUT_REMINDER = """\
-Respond with the JSON object only. No explanation before or after it.
+Respond with exactly one JSON object and nothing else — no explanation
+before or after it. If you reconsider any field while composing your
+answer, output only your final decision; never emit a second, corrected
+JSON object.
 """
 
 
