@@ -127,17 +127,36 @@ def format_ticket(ticket_input: dict) -> str:
     )
 
 
+def _json_object_candidates(text: str):
+    """Yield every complete top-level JSON object found in text."""
+    decoder = json.JSONDecoder()
+    idx = 0
+    while True:
+        start = text.find("{", idx)
+        if start == -1:
+            return
+        try:
+            obj, end = decoder.raw_decode(text, start)
+        except json.JSONDecodeError:
+            idx = start + 1
+            continue
+        if isinstance(obj, dict):
+            yield obj
+        idx = end
+
+
 def parse_response(raw: str) -> TriageResult:
     """Parse the model's JSON reply into a TriageResult. Raises ValueError
-    on malformed JSON or any invalid enum value."""
+    if no JSON object is present or any enum value is invalid.
+
+    The model occasionally reconsiders mid-response and emits a second,
+    corrected JSON object after the first; the last complete object is
+    its final decision, so that one wins."""
     text = re.sub(r"```(?:json)?", "", raw).strip()
-    start, end = text.find("{"), text.rfind("}")
-    if start == -1 or end <= start:
+    candidates = list(_json_object_candidates(text))
+    if not candidates:
         raise ValueError("no JSON object found in response")
-    try:
-        data = json.loads(text[start:end + 1])
-    except json.JSONDecodeError as e:
-        raise ValueError(f"invalid JSON: {e}") from e
+    data = candidates[-1]
 
     category = data.get("category")
     if category not in CATEGORIES:
