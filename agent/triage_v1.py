@@ -57,8 +57,13 @@ Field rules:
 - "escalate": the issue needs a technician. tier2_tech for standard
   technical work, tier3_senior for major outages needing senior
   engineering, security_team for anything security-related.
-- "request_info": the ticket does not contain enough information to
-  triage. Do not guess a runbook; ask targeted clarifying questions.
+- "request_info": use ONLY when the ticket gives no concrete symptoms,
+  errors, or specifics to reason from — you genuinely cannot tell what
+  kind of problem it is. Ask targeted clarifying questions; do not guess
+  a runbook. If the evidence already identifies a real problem that needs
+  a technician, escalate instead — even if the user misdiagnosed the
+  cause or some details are missing. Ruling out the user's own theory is
+  a reason to route the ticket, not to ask for more information.
 - Set priority from business impact using the priority matrix in the
   knowledge base: scope of impact, deadlines, sender seniority, data-loss
   risk. Priority and category are independent judgments — the same
@@ -66,7 +71,11 @@ Field rules:
 - If a ticket contains multiple issues, triage the whole ticket by its
   most severe component.
 - Triage from the symptoms and evidence in the ticket, not the user's
-  own diagnosis — users often misattribute causes.
+  own diagnosis — users often misattribute causes. When a detail in the
+  ticket contradicts the user's stated cause — for example, something
+  they call broken is shown to be working — trust the evidence over the
+  label, and reason to the actual likely source before choosing
+  category, tier, and action.
 """
 
 SAFETY_RULES = """\
