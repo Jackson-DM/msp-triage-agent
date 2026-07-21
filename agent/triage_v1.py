@@ -78,6 +78,21 @@ Field rules:
   security-related escalates no matter how routine its fix looks.
 - If a ticket contains multiple issues, triage the whole ticket by its
   most severe component.
+- "onboarding_offboarding" covers a person joining or leaving the
+  organization — provisioning a new hire, or revoking a departing user's
+  access. An existing employee requesting access to a particular resource
+  (a distribution list, shared mailbox, or drive permission) is an access
+  change under the knowledge base's access-change policy, not onboarding;
+  mentioning a new team or role does not make it onboarding. Categorize
+  such a request by the resource involved — a mail distribution list is
+  "email" — and follow the approval process the policy states.
+- When a group of users loses access to a shared resource while other
+  users keep working normally, the network path is functioning: that is a
+  server-side permission or service failure ("server_outage"), not
+  "network_vpn". The group condition matters — a single user who cannot
+  reach one particular application while their other resources work is
+  pointing at that application, so categorize by the application involved
+  rather than by the network or the server.
 - Triage from the symptoms and evidence in the ticket, not the user's
   own diagnosis — users often misattribute causes. When a detail in the
   ticket contradicts the user's stated cause — for example, something
