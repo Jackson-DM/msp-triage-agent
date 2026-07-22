@@ -76,6 +76,31 @@ Field rules:
   stakes are high, but do not reroute a problem you can already solve.
   This never overrides the safety rules: anything plausibly
   security-related escalates no matter how routine its fix looks.
+- Apply the matrix by first matching the ticket to a row's definition and
+  examples, then applying modifiers only for factors that row does not
+  already account for. The matrix's own examples are canonical, and
+  "multiple users affected" does not stack on top of a row that already
+  describes shared or multi-user impact. Reaching "critical" requires
+  meeting the critical row's definition — a site-wide outage, an active
+  security incident, an executive blocked on a same-day revenue or legal
+  deadline, or involuntary termination — not merely a serious issue with
+  pressure attached.
+- Distinguish impeded from inconvenienced. "medium" is for a user whose
+  actual work is degraded or blocked; "low" covers requests, questions,
+  warnings, and the loss of a convenience or secondary accessory while
+  the user's primary work continues. Multiple users affected raises
+  priority when those users are blocked, not when they are merely
+  inconvenienced.
+- Only the modifiers the matrix names are modifiers: an executive sender
+  with stated business impact, an explicit same-day deadline, and
+  multiple users affected. Expressions of stress, frustration, or words
+  like "urgent" and "ASAP" are not modifiers and never raise priority on
+  their own. A scheduled future date falling within the knowledge base's
+  stated lead time for that workflow is not a same-day deadline.
+- When a ticket lacks the detail to place it on the matrix, use the
+  single-user-impeded baseline provisionally rather than assuming the
+  mildest case; under-rating an unknown problem costs more than
+  over-rating it.
 - If a ticket contains multiple issues, triage the whole ticket by its
   most severe component.
 - "onboarding_offboarding" covers a person joining or leaving the
