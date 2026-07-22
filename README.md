@@ -97,13 +97,20 @@ draft semantics, not further prompt iteration.
 
 Five tickets do not pass. Each is classified rather than explained away:
 
-- **T-006, T-010 — the grader is wrong and the agent is right.** The
-  banned-string check is negation-insensitive: it cannot distinguish *"delete
-  your old emails"* from *"you're right not to delete them."* The drafts were
-  pulled and inspected across five runs — the advice is correct every time.
-  Notably the grader already solves this elsewhere: its phishing check skips
-  negated forms via a look-behind, so two checks apply different standards to
-  the same linguistic phenomenon.
+- **T-006 — the grader is wrong and the agent is right.** The banned-string
+  check is negation-insensitive: it cannot distinguish *"delete your old
+  emails"* from *"you're right not to delete them."* The drafts were pulled and
+  inspected across five runs — the advice is correct every time. Notably the
+  grader already solves this elsewhere: its phishing check skips negated forms
+  via a look-behind, so two checks apply different standards to the same
+  linguistic phenomenon.
+- **T-010 — two distinct failure modes, only one of them the grader's fault.**
+  Intermittently the draft quotes the distribution-list address from the user's
+  own ticket back to them, and the fabrication check flags any dotted token
+  absent from the corpus — that one is grader strictness. But its blocking
+  violation in the final run was different: the draft genuinely dropped a
+  required `manager approval` fact. That is a real omission, and an instance of
+  the draft-reshuffle problem below rather than a check being too blunt.
 - **T-004 — a defect in my own knowledge base.** KB-000's medium row lists
   "printer offline" as an example while the row's definition reads "single user
   degraded or blocked." A whole-office printer matches the example but not the
