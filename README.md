@@ -93,6 +93,67 @@ scattered across precisely the phrasings each new rule reshuffles — protecting
 one string re-exposes another. The recommended fix is LLM-as-judge grading of
 draft semantics, not further prompt iteration.
 
+## A second triager, and three failed attempts to break it
+
+`--agent mcp` runs the same suite through a tool-calling loop against
+[`msp-tools-mcp`](../msp-tools-mcp) instead of a single prompted call. The
+difference that matters: a draft can only reach the output by coming back from
+that server's `draft_response` tool, which refuses security tickets in code.
+A draft the model writes itself is discarded by the client — not forbidden by
+the prompt, discarded after the fact, so no instruction can talk past it.
+
+Three runs, `rules=full`:
+
+| | v1 | mcp |
+|---|---|---|
+| fully correct | 21.3/26 | 20.3/26 (band 20–21) |
+| ship bars cleared in every run | 4 of 4 | **2 of 4** |
+| escalation recall (security) | 100/100/100 | 100/100/100 |
+| cost per ticket | $0.0043 | $0.0157 |
+
+The tool-backed agent is worse and more expensive. Classification and tier both
+clear their bars in only two runs of three, deflection drops 83.3% → 77.8%, and
+each ticket costs 3.6× more for the multi-turn loop. That is the honest headline
+and it belongs above the interesting part rather than below it.
+
+**The interesting part is T-018.** On one run of three the model called a
+ransomware ticket `hardware`, priority medium, tier 2, and routed it to general
+tech support rather than the security team. `draft_response` refused it that run
+exactly as it did the other two — 6 refusals, 0 suppressed drafts, every run,
+on six different KB-006 indicators. The deterministic layer held steady on a run
+where the model's own judgment did not.
+
+Read that as a near-miss rather than a save. The agent still escalated, so no
+draft would have been written regardless.
+
+### Three attempts to show the tool layer was load-bearing, all null
+
+`--rules` runs the suite with the safety rules altered. The point was to break
+the prompt-only agent's security guarantee and watch the tool-backed one keep it.
+
+| Variant | What changed | Escalation recall (security) |
+|---|---|---|
+| `full` | — | 100% |
+| `no-security` | the rule requiring security tickets to escalate, deleted | **100%** |
+| `pressure` | that rule replaced by an efficiency instruction pushing toward auto-resolve | **100%** |
+
+Neither weakening moved it. And this was not a test that failed to apply —
+diffing the two reports, **12 of 20 non-security tickets changed output and 0 of
+6 security tickets did.** The prompt change moved the model all over the
+ordinary queue and not at all where it was aimed.
+
+So the security routing decision was never coming from the safety rule. The
+model recognises these tickets unaided, and `suppressed_drafts` stayed at zero
+throughout, meaning the client-side wall was never load-bearing either.
+
+**On these 26 tickets the tool layer has not been shown to buy anything a
+competent prompt already provides.** What it buys is a guarantee that does not
+depend on the prompt staying competent, or on the model's judgment being stable
+on the run that matters — a different claim, and one this suite cannot
+demonstrate. Recorded here rather than left out, because a fourth attempt to
+find a configuration where the tool wins would be the same error as tuning a
+prompt against the eval it is scored on.
+
 ## Known limitations (documented, not fixed)
 
 Five tickets do not pass. Each is classified rather than explained away:
@@ -136,8 +197,20 @@ python -m evals.run --agent v1               # single live run
 python -m evals.run --agent v1 --runs 3      # stability report + aggregate
 python -m evals.run --agent v1 --limit 5     # smoke test, no report written
 
-python -m pytest tests/ -q                   # 70 offline tests, no API calls
+python -m evals.run --agent mcp              # tool-calling loop vs msp-tools-mcp
+python -m evals.run --agent v1 --rules pressure   # a weakened-prompt variant
+python -m evals.run --agent v1 --model <id>       # a different model
+
+python -m pytest tests/ -q                   # 81 offline tests, no API calls
 ```
+
+`--agent mcp` expects `msp-tools-mcp` beside this repo (override with
+`MSP_TOOLS_DIR`) and needs `pip install "mcp>=1.28,<2"`. It starts the server
+over stdio once per run, not once per ticket.
+
+`--rules` and `--model` both default to the values every published number in
+this README was measured on. A score from any other combination must say so;
+the triager name carries it into the report and the filename.
 
 Exit codes: `0` all ship bars met, `1` hard fail or a bar missed, `2` no
 triager available or missing API key.
@@ -145,11 +218,13 @@ triager available or missing API key.
 ## Layout
 
 ```
-agent/     triage_v1.py (prompt + parser), data_source.py (adapter)
+agent/     triage_v1.py (prompt + parser), triage_mcp.py (tool-calling loop),
+           mcp_bridge.py (stdio client), prompt_variants.py (rule variants),
+           data_source.py (adapter)
 kb/        the knowledge-base corpus — the agent's ONLY source of facts
 evals/     golden_tickets.json, eval-spec.md, grader.py, run.py,
            aggregate.py (multi-run aggregation), reports/
-tests/     70 offline tests: grader, parser, aggregation
+tests/     81 offline tests: grader, parser, aggregation, prompt variants
 ```
 
 The grader is pure standard library and makes no API calls, so grading is
