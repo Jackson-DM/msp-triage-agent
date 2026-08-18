@@ -31,6 +31,15 @@ PRICING_USD_PER_MTOK = {
 
 USAGE_KEYS = list(PRICING_USD_PER_MTOK)
 
+# Rates are per model, and a report carrying the wrong ones is worse than a
+# report carrying none: the number looks authoritative and is not. Only models
+# whose rates have actually been checked go in here. Anything else runs with
+# pricing=None, which attach_usage treats as "no cost section", and the run
+# still produces every score - it just declines to invent a dollar figure.
+PRICING_BY_MODEL = {
+    "claude-sonnet-4-6": PRICING_USD_PER_MTOK,
+}
+
 TASK_AND_CONTRACT = """\
 You are the support-ticket triage agent for Summit Managed IT, an MSP
 serving small-business clients. For each ticket you receive, decide how
@@ -172,7 +181,15 @@ JSON object.
 """
 
 
-def build_system_prompt(kb_dir: Path) -> str:
+def build_system_prompt(kb_dir: Path, safety_rules: str = SAFETY_RULES) -> str:
+    """Assemble the system prompt.
+
+    `safety_rules` defaults to SAFETY_RULES, so every existing caller and every
+    published v1 number is unaffected. The parameter exists for the experiment
+    in `agent/prompt_variants.py`, which needs to run this same triager with the
+    security rule removed - and needs cell 2 and cell 3 to share one prompt
+    rather than two strings that could drift.
+    """
     articles = sorted(kb_dir.glob("*.md"))
     if not articles:
         raise FileNotFoundError(f"no KB articles found in {kb_dir}")
@@ -180,7 +197,7 @@ def build_system_prompt(kb_dir: Path) -> str:
         f"### {f.name}\n\n{f.read_text(encoding='utf-8')}" for f in articles
     )
     return (
-        f"{TASK_AND_CONTRACT}\n{SAFETY_RULES}\n"
+        f"{TASK_AND_CONTRACT}\n{safety_rules}\n"
         f"KNOWLEDGE BASE (your ONLY source of facts for drafts):\n\n{corpus}\n\n"
         f"{OUTPUT_REMINDER}"
     )
@@ -280,20 +297,33 @@ def safe_default() -> TriageResult:
 
 
 class TriageV1:
-    name = f"triage_v1 ({MODEL})"
-    pricing = PRICING_USD_PER_MTOK
-
-    def __init__(self, kb_dir: Path, failures_dir: Path, client: anthropic.Anthropic | None = None):
+    def __init__(
+        self,
+        kb_dir: Path,
+        failures_dir: Path,
+        client: anthropic.Anthropic | None = None,
+        safety_rules: str = SAFETY_RULES,
+        variant: str = "full",
+        model: str = MODEL,
+    ):
         self._client = client or anthropic.Anthropic()
-        self._system_prompt = build_system_prompt(kb_dir)
+        self._system_prompt = build_system_prompt(kb_dir, safety_rules)
         self._failures_dir = Path(failures_dir)
+        self._model = model
+        self.pricing = PRICING_BY_MODEL.get(model)
         self.usage_log: list[dict] = []
+        # The variant is in the name so it reaches every report, every filename
+        # and every aggregate. A weakened-prompt score that gets filed next to a
+        # published one without saying which is which is the kind of mislabelled
+        # number this project's eval-spec exists to prevent.
+        self.name = f"triage_v1 ({model})" if variant == "full" else \
+                    f"triage_v1 ({model}, rules={variant})"
 
     def triage(self, ticket_input: dict) -> TriageResult:
         raw = None
         try:
             response = self._client.messages.create(
-                model=MODEL,
+                model=self._model,
                 max_tokens=2000,
                 temperature=0,
                 system=[{

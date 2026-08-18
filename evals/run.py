@@ -47,23 +47,65 @@ METRIC_LABELS = {
 }
 
 
+def _require_api_key(which: str) -> None:
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return
+    print(
+        f"ANTHROPIC_API_KEY is not set. The {which} triager makes live API\n"
+        "calls; export the key and re-run:\n"
+        "  $env:ANTHROPIC_API_KEY = '<your key>'   (PowerShell)\n"
+        "  export ANTHROPIC_API_KEY='<your key>'   (bash)",
+        file=sys.stderr,
+    )
+    sys.exit(2)
+
+
+def _safety_rules(variant: str) -> str:
+    from agent.prompt_variants import VARIANTS
+    if variant not in VARIANTS:
+        print(f"unknown --rules {variant!r}; choose from {sorted(VARIANTS)}", file=sys.stderr)
+        sys.exit(2)
+    return VARIANTS[variant]()
+
+
 def build_triager(args):
     if args.dummy:
         from .dummy_triager import DummyTriager
         return DummyTriager()
+
+    variant = getattr(args, "rules", "full")
+
+    from agent.triage_v1 import MODEL as DEFAULT_MODEL, PRICING_BY_MODEL
+    model = getattr(args, "model", None) or DEFAULT_MODEL
+    if model not in PRICING_BY_MODEL:
+        print(
+            f"note: no checked pricing for {model!r}; this run will report scores\n"
+            "      but no cost estimate. Add its rates to PRICING_BY_MODEL in\n"
+            "      agent/triage_v1.py if you want one - a guessed rate in a\n"
+            "      report reads as authoritative and is not.",
+            file=sys.stderr,
+        )
+
     if args.agent == "v1":
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            print(
-                "ANTHROPIC_API_KEY is not set. The v1 triager makes live API\n"
-                "calls; export the key and re-run:\n"
-                "  $env:ANTHROPIC_API_KEY = '<your key>'   (PowerShell)\n"
-                "  export ANTHROPIC_API_KEY='<your key>'   (bash)",
-                file=sys.stderr,
-            )
-            sys.exit(2)
+        _require_api_key("v1")
         from agent.triage_v1 import TriageV1
-        return TriageV1(KB_DIR, REPORTS_DIR / "parse_failures")
-    print("Select a triager: --dummy (baseline) or --agent v1.", file=sys.stderr)
+        return TriageV1(
+            KB_DIR, REPORTS_DIR / "parse_failures", safety_rules=_safety_rules(variant),
+            variant=variant, model=model,
+        )
+
+    if args.agent == "mcp":
+        _require_api_key("mcp")
+        from agent.triage_mcp import TriageMCP
+        # msp-tools-mcp is expected beside this repo, the same assumption
+        # scripts/build_tickets.py already makes in the other direction.
+        server_dir = Path(os.environ.get("MSP_TOOLS_DIR") or (ROOT.parent / "msp-tools-mcp"))
+        return TriageMCP(
+            server_dir, KB_DIR, REPORTS_DIR / "parse_failures",
+            safety_rules=_safety_rules(variant), variant=variant, model=model,
+        )
+
+    print("Select a triager: --dummy (baseline) or --agent v1|mcp.", file=sys.stderr)
     sys.exit(2)
 
 
@@ -185,15 +227,49 @@ def attach_usage(report: dict, triager) -> None:
     }
 
 
+def attach_guardrail_events(report: dict, triager) -> None:
+    """Record what the tool layer did, for triagers that have one.
+
+    These are the experiment's primary observations, not diagnostics:
+
+      tool_refusals     - draft_response declined, and on what indicators.
+                          How often the wall fired.
+      suppressed_drafts - the model wrote its own draft anyway and it was
+                          discarded. How often the wall was load-bearing
+                          rather than merely agreed with.
+
+    A run where refusals are high and suppressions are zero means the agent
+    took the refusal and complied. One where suppressions are non-zero means
+    it tried to route around the tool, and only the client stopped it. Those
+    are very different stories about the same headline number, and neither is
+    visible in the ship bars.
+    """
+    refusals = getattr(triager, "tool_refusals", None)
+    if refusals is None:
+        return
+    report["guardrail"] = {
+        "tool_refusals": refusals,
+        "suppressed_drafts": list(getattr(triager, "suppressed_drafts", [])),
+    }
+
+
 def run_once(args, tickets, kb) -> dict:
     """One full graded pass with a FRESH triager, so each run's usage_log has
     exactly len(tickets) entries and attach_usage's zip stays aligned."""
     triager = build_triager(args)
-    report = grade_suite(tickets, triager, kb)
-    report["triager"] = getattr(triager, "name", type(triager).__name__)
-    report["generated_at"] = datetime.now(timezone.utc).isoformat()
-    attach_usage(report, triager)
-    return report
+    try:
+        report = grade_suite(tickets, triager, kb)
+        report["triager"] = getattr(triager, "name", type(triager).__name__)
+        report["generated_at"] = datetime.now(timezone.utc).isoformat()
+        attach_usage(report, triager)
+        attach_guardrail_events(report, triager)
+        return report
+    finally:
+        # A tool-backed triager owns a server subprocess. --runs 3 builds three
+        # of them, and without this each one outlives its run.
+        closer = getattr(triager, "close", None)
+        if callable(closer):
+            closer()
 
 
 def single_run_exit_code(report: dict) -> int:
@@ -280,14 +356,38 @@ def print_aggregate_scorecard(agg: dict, previous: dict | None) -> None:
         print("\nAll tickets stable-pass across every run.")
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """The CLI, built separately so a test can read it without running it."""
     parser = argparse.ArgumentParser(prog="python -m evals.run",
                                      description="Run the golden eval suite.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--dummy", action="store_true",
                        help="use the always-escalate baseline triager")
-    group.add_argument("--agent", choices=["v1"],
-                       help="use a live agent triager (needs ANTHROPIC_API_KEY)")
+    group.add_argument("--agent", choices=["v1", "mcp"],
+                       help="use a live agent triager (needs ANTHROPIC_API_KEY). "
+                            "v1 = single call, KB in the prompt. "
+                            "mcp = tool-calling loop against msp-tools-mcp, where "
+                            "a draft can only come from draft_response.")
+    # Kept in step with agent.prompt_variants.VARIANTS by
+    # tests/test_prompt_variants.py rather than by importing it here, because
+    # build_triager defers every agent import so that --help and --dummy do not
+    # need the Anthropic SDK. A list that must match another list is exactly
+    # the kind of invariant this repo pins with a test.
+    parser.add_argument("--rules", choices=["full", "no-security", "pressure"],
+                        default="full",
+                        help="which SAFETY_RULES variant to run. 'no-security' "
+                             "deletes the rule requiring security tickets to be "
+                             "escalated; 'pressure' replaces it and the "
+                             "escalate-when-uncertain default with an "
+                             "efficiency instruction. See agent/prompt_variants.py. "
+                             "Never publish a score from either without saying "
+                             "which variant produced it.")
+    parser.add_argument("--model", metavar="ID",
+                        help="model id for the live triagers (default: the "
+                             "constant in agent/triage_v1.py). Every published "
+                             "number was measured on the default; a score from "
+                             "any other model must say so, and the triager name "
+                             "in the report carries it.")
     parser.add_argument("--limit", type=int, metavar="N",
                         help="smoke test: run only the first N tickets "
                              "(no report file written)")
@@ -295,6 +395,11 @@ def main(argv: list[str] | None = None) -> int:
                         help="run the whole suite N times and report per-ticket "
                              "stability + a mean/min-max metric band (default 1). "
                              "--runs 1 keeps the single-run report format.")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
     args = parser.parse_args(argv)
     if args.runs < 1:
         parser.error("--runs must be >= 1")
