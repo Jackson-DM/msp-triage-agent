@@ -169,7 +169,7 @@ degrading machine — they announce themselves, and a weak model with a hostile
 prompt still routes them correctly.
 
 Hard security tickets demonstrably exist. [`msp-tools-mcp`](../msp-tools-mcp)
-measured its own deterministic scan at 3 of 25 on independently authored
+measured its own deterministic scan at 5 of 30 on independently authored
 incidents. **None of that difficulty is represented here.** A 26-case suite
 written in week one, before any agent existed, turns out to have sampled the
 legible end of the category — a real limitation, found by an experiment aimed at
