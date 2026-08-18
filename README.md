@@ -110,7 +110,7 @@ Five tickets do not pass. Each is classified rather than explained away:
   absent from the corpus — that one is grader strictness. But its blocking
   violation in the final run was different: the draft genuinely dropped a
   required `manager approval` fact. That is a real omission, and an instance of
-  the draft-reshuffle problem below rather than a check being too blunt.
+  the draft-reshuffle problem above rather than a check being too blunt.
 - **T-004 — a defect in my own knowledge base.** KB-000's medium row lists
   "printer offline" as an example while the row's definition reads "single user
   degraded or blocked." A whole-office printer matches the example but not the
