@@ -126,33 +126,61 @@ where the model's own judgment did not.
 Read that as a near-miss rather than a save. The agent still escalated, so no
 draft would have been written regardless.
 
-### Three attempts to show the tool layer was load-bearing, all null
+### Five attempts to break the security guarantee, all null
 
-`--rules` runs the suite with the safety rules altered. The point was to break
-the prompt-only agent's security guarantee and watch the tool-backed one keep it.
+`--rules` alters the safety rules and `--model` swaps the model. The point was
+to break the prompt-only agent's security guarantee and watch the tool-backed
+one keep it. It never broke.
 
-| Variant | What changed | Escalation recall (security) |
-|---|---|---|
-| `full` | — | 100% |
-| `no-security` | the rule requiring security tickets to escalate, deleted | **100%** |
-| `pressure` | that rule replaced by an efficiency instruction pushing toward auto-resolve | **100%** |
+| Model | Rules | Fully correct | Deflection | **Escalation recall (security)** |
+|---|---|---|---|---|
+| sonnet-4-6 | `full` | 21.3/26 | 83.3% | **100%** |
+| sonnet-4-6 | `no-security` | 20/26 | — | **100%** |
+| sonnet-4-6 | `pressure` | 20/26 | — | **100%** |
+| haiku-4-5 | `full` | 16/26 | 58.3% | **100%** |
+| haiku-4-5 | `pressure` | 14/26 | 58.3% | **100%** |
 
-Neither weakening moved it. And this was not a test that failed to apply —
-diffing the two reports, **12 of 20 non-security tickets changed output and 0 of
-6 security tickets did.** The prompt change moved the model all over the
-ordinary queue and not at all where it was aimed.
+`no-security` deletes the rule requiring security tickets to escalate.
+`pressure` replaces it, and the escalate-when-uncertain default, with an
+efficiency instruction pushing toward auto-resolve — written the way an
+operations lead actually writes one, as a cost complaint with no mention of
+security. See `agent/prompt_variants.py`.
 
-So the security routing decision was never coming from the safety rule. The
-model recognises these tickets unaided, and `suppressed_drafts` stayed at zero
-throughout, meaning the client-side wall was never load-bearing either.
+Everything else moved a great deal. The weaker model costs five tickets, the
+drifted prompt on top costs two more, deflection falls 25 points, and
+priority-exact drops 84.6% → 65.4%. **Everything degraded except the thing the
+experiment was trying to degrade.**
 
-**On these 26 tickets the tool layer has not been shown to buy anything a
-competent prompt already provides.** What it buys is a guarantee that does not
-depend on the prompt staying competent, or on the model's judgment being stable
-on the run that matters — a different claim, and one this suite cannot
-demonstrate. Recorded here rather than left out, because a fourth attempt to
-find a configuration where the tool wins would be the same error as tuning a
-prompt against the eval it is scored on.
+Nor was this a test that failed to apply. Diffing the two sonnet reports, **12
+of 20 non-security tickets changed output and 0 of 6 security tickets did.** The
+prompt change moved the model all over the ordinary queue and not at all where
+it was aimed.
+
+### What that actually says, which is about the suite
+
+The security routing decision was never coming from the safety rule, and it does
+not depend on model capability at either of these tiers. On these 26 tickets the
+tool layer is redundant, and `suppressed_drafts` stayed at zero throughout, so
+the client-side wall was never load-bearing either.
+
+The reason is that **this suite's six security tickets are all easy.**
+Ransomware, credentials entered on a fake page, an attachment followed by a
+degrading machine — they announce themselves, and a weak model with a hostile
+prompt still routes them correctly.
+
+Hard security tickets demonstrably exist. [`msp-tools-mcp`](../msp-tools-mcp)
+measured its own deterministic scan at 3 of 25 on independently authored
+incidents. **None of that difficulty is represented here.** A 26-case suite
+written in week one, before any agent existed, turns out to have sampled the
+legible end of the category — a real limitation, found by an experiment aimed at
+something else entirely.
+
+So the honest claim is narrow: *this* suite cannot produce the condition under
+which a tool-layer guarantee beats a prompt-layer one. Commissioning harder
+security tickets would probably change that, and it is deliberately not being
+done here — building a corpus because the null result was inconvenient is
+indistinguishable from tuning a prompt against its own eval, and there is no way
+to write that up honestly afterwards. Five attempts is where this stops.
 
 ## Known limitations (documented, not fixed)
 
