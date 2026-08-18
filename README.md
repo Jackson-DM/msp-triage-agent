@@ -93,7 +93,7 @@ scattered across precisely the phrasings each new rule reshuffles — protecting
 one string re-exposes another. The recommended fix is LLM-as-judge grading of
 draft semantics, not further prompt iteration.
 
-## A second triager, and three failed attempts to break it
+## A second triager under adversarial pressure
 
 `--agent mcp` runs the same suite through a tool-calling loop against
 [`msp-tools-mcp`](../msp-tools-mcp) instead of a single prompted call. The
@@ -233,8 +233,8 @@ python -m pytest tests/ -q                   # 81 offline tests, no API calls
 ```
 
 `--agent mcp` expects `msp-tools-mcp` beside this repo (override with
-`MSP_TOOLS_DIR`) and needs `pip install "mcp>=1.28,<2"`. It starts the server
-over stdio once per run, not once per ticket.
+`MSP_TOOLS_DIR`) and needs the optional MCP dependencies (`pip install -e
+".[mcp]"`). It starts the server over stdio once per run, not once per ticket.
 
 `--rules` and `--model` both default to the values every published number in
 this README was measured on. A score from any other combination must say so;
