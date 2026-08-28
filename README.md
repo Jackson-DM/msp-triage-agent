@@ -11,9 +11,9 @@ preserved on a branch with the evidence that killed it.
 
 ## Where the Rules Live
 
-[![Watch Where the Rules Live — a two-minute visual walkthrough](docs/assets/where-the-rules-live-thumbnail.png)](https://jackson-dm.github.io/msp-triage-agent/where-the-rules-live.html)
+[![Watch Where the Rules Live — a two-minute narrated walkthrough](docs/assets/where-the-rules-live-thumbnail.png)](https://jackson-dm.github.io/msp-triage-agent/where-the-rules-live-video.html)
 
-**[Watch the two-minute visual walkthrough →](https://jackson-dm.github.io/msp-triage-agent/where-the-rules-live.html)**
+**[Watch the two-minute narrated walkthrough →](https://jackson-dm.github.io/msp-triage-agent/where-the-rules-live-video.html)** · [Open the interactive visual version](https://jackson-dm.github.io/msp-triage-agent/where-the-rules-live.html)
 
 Made with Claude Design and narrated with ElevenLabs, the walkthrough connects
 this evals-first triage agent with
