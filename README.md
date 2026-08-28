@@ -9,6 +9,18 @@ The interesting part of this repo is not the score. It is the record of how the
 score was reached — including three prompt fixes that made things worse, each
 preserved on a branch with the evidence that killed it.
 
+## Where the Rules Live
+
+[![Watch Where the Rules Live — a two-minute visual walkthrough](docs/assets/where-the-rules-live-thumbnail.png)](https://jackson-dm.github.io/msp-triage-agent/where-the-rules-live.html)
+
+**[Watch the two-minute visual walkthrough →](https://jackson-dm.github.io/msp-triage-agent/where-the-rules-live.html)**
+
+Made with Claude Design and narrated with ElevenLabs, the walkthrough connects
+this evals-first triage agent with
+[`msp-tools-mcp`](https://github.com/Jackson-DM/msp-tools-mcp), where the
+guardrail is enforced in the tool layer. The presentation is the guided tour;
+the code, evals, and measured results live in the two repositories.
+
 ---
 
 ## Result
